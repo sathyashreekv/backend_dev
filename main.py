@@ -10,8 +10,8 @@ class WindowData(BaseModel):
 class TwoSum(BaseModel):
     values:List[int]
     target:int
-class Palindromechecker(BaseModel):
-    s:str
+class PalindromeChecker(BaseModel):
+    s: str
 
 @app.post("/max-sum")
 def get_max_sum(data: WindowData):
@@ -59,25 +59,34 @@ def findTwosum(data:TwoSum):
     except Exception as e:
         raise HTTPException(status_code=500,detail=f"Internal server error:{str(e)}")
 @app.post("/palindromechecker")
-def checkpalindrome(data:Palindromechecker):
+def checkpalindrome(data: PalindromeChecker):
     try:
-        word=data.s.strip().lower()
+        word = data.s.strip().lower()
         if not word:
-            raise HTTPException(status_code=400,detail="word dtring cannot be empty")
-        l=0
-        r=len(word)-1
-        while l<r:
-            while l<r and not word[l].isalnum():
-                l+=1
-            while l<r and not word[r].isalnum():
-                r-=1
+            raise HTTPException(status_code=400, detail="String cannot be empty")
+        
+        l = 0
+        r = len(word) - 1
+        
+        while l < r:
+            # Skip non-alphanumeric characters from left
+            while l < r and not word[l].isalnum():
+                l += 1
+            # Skip non-alphanumeric characters from right
+            while l < r and not word[r].isalnum():
+                r -= 1
+            
             if word[l] != word[r]:
-                return {"is_palindrome":False}
-        return {"is_palindrome":True}
+                return {"is_palindrome": False}
+            
+            l += 1  # Missing: move left pointer
+            r -= 1  # Missing: move right pointer
+        
+        return {"is_palindrome": True}
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error:{str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/")
 def root():
