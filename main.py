@@ -44,7 +44,7 @@ def findTwosum(data:TwoSum):
         if  len(elements)==0:
             raise HTTPException(status_code=400,detail="Elements array cannot be empty")
         if len(elements) < 2:
-            raise HTTPException(status_code=400,detail="Elements array should contain more than 2 elements")
+            raise HTTPException(status_code=400, detail="Elements array should contain at least 2 elements")
         preview={}
         for i,num in enumerate(elements):
             diff=target-num
