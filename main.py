@@ -10,6 +10,8 @@ class WindowData(BaseModel):
 class TwoSum(BaseModel):
     values:List[int]
     target:int
+class Palindromechecker(BaseModel):
+    s:str
 
 @app.post("/max-sum")
 def get_max_sum(data: WindowData):
@@ -56,7 +58,26 @@ def findTwosum(data:TwoSum):
         raise
     except Exception as e:
         raise HTTPException(status_code=500,detail=f"Internal server error:{str(e)}")
-   
+@app.post("/palindromechecker")
+def checkpalindrome(data:Palindromechecker):
+    try:
+        word=data.s.strip().lower()
+        if not word:
+            raise HTTPException(status_code=400,detail="word dtring cannot be empty")
+        l=0
+        r=len(word)-1
+        while l<r:
+            while l<r and not word[l].isalnum():
+                l+=1
+            while l<r and not word[r].isalnum():
+                r-=1
+            if word[l] != word[r]:
+                return {"is_palindrome":False}
+        return {"is_palindrome":True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error:{str(e)}")
 
 @app.get("/")
 def root():
