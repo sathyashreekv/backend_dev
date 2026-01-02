@@ -41,7 +41,7 @@ def findTwosum(data:TwoSum):
     try:
         elements=data.values
         target=data.target
-        if not elements:
+        if  len(elements)==0:
             raise HTTPException(status_code=400,detail="Elements array cannot be empty")
         if len(elements) < 2:
             raise HTTPException(status_code=400,detail="Elements array should contain more than 2 elements")
