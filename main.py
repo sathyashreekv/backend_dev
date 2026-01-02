@@ -37,29 +37,26 @@ def get_max_sum(data: WindowData):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 @app.post("/Two-sum")
-def findTwosum(data: TwoSum):
+def findTwosum(data:TwoSum):
     try:
-        elements = data.values
-        target = data.target
-        
+        elements=data.values
+        target=data.target
         if not elements:
-            raise HTTPException(status_code=400, detail="Elements array cannot be empty")
+            raise HTTPException(status_code=400,detail="Elements array cannot be empty")
         if len(elements) < 2:
-            raise HTTPException(status_code=400, detail="Elements array should contain at least 2 elements")
-        
-        # Two Sum algorithm
-        preview = {}
-        for i, num in enumerate(elements):
-            diff = target - num
+            raise HTTPException(status_code=400,detail="Elements array should contain more than 2 elements")
+        preview={}
+        for i,num in enumerate(elements):
+            diff=target-num
             if diff in preview:
-                return {"indices": [preview[diff], i]}
-            preview[num] = i
-        
-        return {"indices": []}  # No solution found
+               return {"indices": [preview[diff], i]}  # Fixed: proper JSON format
+            preview[num]=i
+        return {"indices": []} 
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500,detail=f"Internal server error:{str(e)}")
+   
 
 @app.get("/")
 def root():
