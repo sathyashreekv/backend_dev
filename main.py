@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 
@@ -13,31 +13,53 @@ class TwoSum(BaseModel):
 
 @app.post("/max-sum")
 def get_max_sum(data: WindowData):
-    # Your Sliding Window Logic here
-    nums = data.numbers
-    k = data.k
-    if not nums or k > len(nums):
-        return {"error": "Invalid input"}
-    
-    current_sum = sum(nums[:k])
-    max_sum = current_sum
-    
-    for i in range(len(nums) - k):
-        current_sum = current_sum - nums[i] + nums[i+k]
-        max_sum = max(max_sum, current_sum)
+    try:
+        nums = data.numbers
+        k = data.k
         
-    return {"max_sum": max_sum}
+        if not nums:
+            raise HTTPException(status_code=400, detail="Numbers array cannot be empty")
+        if k <= 0:
+            raise HTTPException(status_code=400, detail="k must be positive")
+        if k > len(nums):
+            raise HTTPException(status_code=400, detail="k cannot be larger than array length")
+        
+        current_sum = sum(nums[:k])
+        max_sum = current_sum
+        
+        for i in range(len(nums) - k):
+            current_sum = current_sum - nums[i] + nums[i+k]
+            max_sum = max(max_sum, current_sum)
+            
+        return {"max_sum": max_sum}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 @app.post("/Two-sum")
-def findTwosum(data:TwoSum):
-    elements=data.values
-    target=data.target  # Fixed: was data.k, should be data.target
-    preview={}
-    for i,num in enumerate(elements):
-        diff=target-num
-        if diff in preview:
-            return {"indices": [preview[diff], i]}  # Fixed: proper JSON format
-        preview[num]=i
-    return {"indices": []}  # Fixed: proper JSON format
+def findTwosum(data: TwoSum):
+    try:
+        elements = data.values
+        target = data.target
+        
+        if not elements:
+            raise HTTPException(status_code=400, detail="Elements array cannot be empty")
+        if len(elements) < 2:
+            raise HTTPException(status_code=400, detail="Elements array should contain at least 2 elements")
+        
+        # Two Sum algorithm
+        preview = {}
+        for i, num in enumerate(elements):
+            diff = target - num
+            if diff in preview:
+                return {"indices": [preview[diff], i]}
+            preview[num] = i
+        
+        return {"indices": []}  # No solution found
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/")
 def root():
