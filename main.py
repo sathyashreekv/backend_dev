@@ -1,8 +1,39 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
+import logging
+from datetime import datetime
+import time
+from sqlalchemy.orm import Session
+from database import get_db, APIRequest
 
 app = FastAPI()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Middleware to log requests
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+    
+    # Log to database (we'll add this functionality)
+    logger.info(f"{request.method} {request.url.path} - {response.status_code} - {process_time:.2f}ms")
+    db=next(get_db())
+    db_request = APIRequest(
+        endpoint=request.url.path,
+        method=request.method,
+        response_time=process_time,
+        status_code=response.status_code
+    )
+    db.add(db_request)
+    db.commit()
+    db.close()
+    
+    return response
 
 class WindowData(BaseModel):
     numbers: List[int]
@@ -15,6 +46,7 @@ class PalindromeChecker(BaseModel):
 
 @app.post("/max-sum")
 def get_max_sum(data: WindowData):
+    logger.info(f"Max-sum request: array_length={len(data.numbers)}, k={data.k}")
     try:
         nums = data.numbers
         k = data.k
